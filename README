@@ -1,0 +1,154 @@
+
+Integration of the Boomerang Library into OpenACS
+=================================================
+
+Boomerang is a JavaScript library to measure the performance of your
+website from your end user’s point of view. It has the ability to send
+performance data measured at the client back to the server via a
+beacon URL further analysis.  The boomerang library implements Real
+User Measurement (RUM) to measure the performance experience of real
+users by collecting quality indicators from the clients.
+
+The boomerang library is released under the BSD license.
+
+Details:
+    https://soasta.github.io/boomerang/doc/
+
+This package integrates boomerang with OpenACS, in particular with
+OpenACS subsites.
+
+
+FEATURES:
+=========
+
+- Obtain client site timings to measures the performance of your
+  website from your end user's point of view.
+
+- Support sampling (e.g. just obtain metrics from every nth request)
+
+- Output performance data in a format suitable for feeding into
+  Elasticsearch/Logstash (see below for a sample config file)
+
+- Configure the appearance of the boomerang per subsite with
+  the following parameters:
+     BoomerangEnabled    0|1
+     BoomerangSample     1
+     BoomerangBeaconUrl  /boomerang_handler
+
+  The parameter BoomerangSample can be used for busy sites
+  to sample not every request (when the value is 1), but e.g.
+  every 5th request (setting BoomerangSample to 5).
+  
+- Support for host-node-mapped subsites
+
+- Performance: include boomerang in the template costs about 0.3ms,
+  processing of the beacon call takes about 1ms (filter times).
+
+
+INSTALLATON:
+============
+ 1) Install this package via the OpenACS Package Manager
+
+ 2) Add this package to the templating system
+
+    - OpenACS 5.10.0d2 or newer:
+      The cookie consent widgets uses the "subsite::page_plugin"
+      callback, so no changes on templates are necessary.
+
+      Make sure to update as well the acs-bootstrap-installer to
+      5.10.0d2 or newer to obtain the updated blank-master.
+
+    - OpenACS 5.9.1:
+      Add to the top of your blank-master.tcl the following snippet:
+
+      ================================================================
+      if {[info commands ::boomerang::initialize_widget] ne ""} {
+	  ::boomerang::initialize_widget
+      }
+      ================================================================
+
+ 3) Configure in the parameters of the subsite (e.g. the main subsite)
+    the section "Boomerang Plugin"
+
+
+USAGE:
+======
+  For the explanation of the parameters, see:
+     https://soasta.github.io/boomerang/doc/howtos/howto-0.html
+     https://soasta.github.io/boomerang/doc/api/RT.html
+     https://soasta.github.io/boomerang/doc/api/navtiming.html     
+
+
+PREREQUIREMENTS:
+================
+
+The implementation uses nx from the next-scripting framework.
+
+    https://next-scripting.org/xowiki/
+
+which is automatically installed for XOTcl2 via
+https://openacs.org/xowiki/naviserver-openacs
+
+It works best with OpenACS 5.10.0d2 or newer, but works as well
+with 5.9.1 (see INSTALLATION section above) or earlier versions
+supporting Content Security Policy (CSP), and probably with  
+earlier versions as well, when CSP code is commented out.
+
+
+OPTIONAL: DEFINE A CUSTOM BOOMERANG PLUGIN
+==========================================
+
+ 1) clone boomerang repository
+ 
+ 2) install npm, grunt if necessary
+
+ 3) Follow step 2 in https://github.com/SOASTA/boomerang
+    which means
+      ... configure plugins
+      ... grunt clean build
+
+ 4) The result is in the build directory. The generated
+    files have the a build-time stamp in seconds included.
+    You might which to rename these with a custom name.
+    
+ 5) Copy the the *.min.js and *.min.js.gz files to
+    the boomerang/www/resouces directory, which might be
+    
+      cp  build/boomerang-1.0.*.min.js build/boomerang-1.0.*.min.js.gz ..
+
+    and adapt the version number in the boomerang parameters
+    (on /acs-subsite)
+
+
+
+OPTIONAL: FEED DATA INTO AN ELASTICSEARCH CLUSTER
+=================================================
+
+When boomerang is enabled, the results of the beacon are placed into
+the OpenACS log directory with a name boomerang-*.log (containing the date).
+
+Below are sample-snippets from OpenACS.org the log-files into elasticsearch,
+such that it can be analyzed later with kibana or grafana.
+
+------------------------------------------------------------ sample filebeat entry
+    -
+      paths:
+        - /var/www/openacs.org/log/boomerang-*.log
+      input_type: log
+      fields:
+          log_type: boomerang-log
+------------------------------------------------------------
+
+
+------------------------------------------------------------matching input filter for logstash
+  if [fields][log_type] == "boomerang-log" {
+    json {
+       source => "message"
+       remove_field => [ "restiming" ]
+    }
+    grok {
+       match => [ "source", "/var/www/%{GREEDYDATA:server}/log/boomerang-" ]
+    }    
+    geoip { source => "clientip" }
+  }
+------------------------------------------------------------
