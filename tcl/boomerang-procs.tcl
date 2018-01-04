@@ -76,7 +76,9 @@ namespace eval ::boomerang {
         }
 
         foreach {orig new} {
-            dom.script.ext dom.script_ext
+            dom.script.ext  dom.script_ext
+            dom.img.uniq    dom.img_uniq
+            dom.script.uniq dom.script_uniq
         } {
             set :json_map($orig) $new
         }
