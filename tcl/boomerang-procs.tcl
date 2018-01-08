@@ -184,7 +184,7 @@ namespace eval ::boomerang {
                         }
                     }
                     if {[dict get $entries $nt_total_time] < $t_done} {
-                        ns_log Warning "boomerang: nt_total_time $nt_total_time < t_done $t_done"
+                        ns_log Warning "boomerang: nt_total_time [dict get $entries $nt_total_time] < t_done $t_done"
                     }
                     set record 1
                 } else {
