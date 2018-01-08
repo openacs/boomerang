@@ -56,7 +56,8 @@ namespace eval ::boomerang {
             nt_res_end nt_res_st nt_spdy nt_ssl_st nt_unload_end
             nt_unload_st
 
-            nt_start_time nt_tcp_time nt_request_time nt_response_time nt_processing_time
+            nt_start_time nt_tcp_time nt_request_time nt_response_time
+            nt_processing_time nt_total_time
 
             dom.res dom.doms dom.ln dom.sz dom.img dom.script dom.script.ext dom.iframe dom.link
 
@@ -166,12 +167,13 @@ namespace eval ::boomerang {
                     dict set entries nt_request_time [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
                     dict set entries nt_processing_time [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
+                    dict set entries nt_total_time [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
 
                     #
-                    # Sanity check for the computed fields:
+                    # Sanity checks for the computed fields:
                     # - no *_time can be larger than t_done
                     # - no *_time must be negative
-                    #
+                    # - check for unrealistic high t_done times (caused be technicalities)
                     set t_done [dict get $entries t_done]
                     set time_fields { nt_start_time nt_tcp_time nt_request_time nt_response_time nt_processing_time }
                     foreach time_field $time_fields {
@@ -180,6 +182,9 @@ namespace eval ::boomerang {
                             ns_log Warning "boomerang: strange value for $time_field: <$v> computed from $entries"
                             dict set entries $time_field 0
                         }
+                    }
+                    if {[dict get $entries $nt_total_time] < $t_done} {
+                        ns_log Warning "boomerang: nt_total_time $nt_total_time < t_done $t_done"
                     }
                     set record 1
                 } else {
