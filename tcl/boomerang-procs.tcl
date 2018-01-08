@@ -183,7 +183,7 @@ namespace eval ::boomerang {
                             dict set entries $time_field 0
                         }
                     }
-                    if {[dict get $entries nt_total_time] < $t_done} {
+                    if {[dict get $entries nt_total_time] + 500 < $t_done} {
                         ns_log Warning "boomerang: nt_total_time [dict get $entries nt_total_time] < t_done $t_done"
                     }
                     set record 1
@@ -299,7 +299,7 @@ namespace eval ::boomerang {
         Initialize an boomerang widget.
 
     } {
-        set t0 [clock clicks -microseconds]
+        #set t0 [clock clicks -microseconds]
         if {$subsite_id eq ""} {
             set subsite_id [get_relevant_subsite]
         }
@@ -368,7 +368,7 @@ namespace eval ::boomerang {
                 }]
             }
         }
-        ns_log notice "boomerang::initialize_widget [expr {[clock clicks -microseconds] - $t0}] microseconds"
+        #ns_log notice "boomerang::initialize_widget [expr {[clock clicks -microseconds] - $t0}] microseconds"
     }
 
 
