@@ -240,11 +240,11 @@ namespace eval ::boomerang {
             #  - u:   URL of Page, XHR or SPA route that caused the beacon
             #
             if {![dict exists $entries r]} {
-                ns_log notice "boomerang: no r value in $entries"
-                dict set entries r ""
+                set r ""
+            } else {
+                set r [dict get $entries r]
             }
-            set r [dict get $entries r]
-            set u [dict get $entries u]
+            set u   [dict get $entries u]
             set pid [dict get $entries pid]
             if {$r ne "" && $r ne $u} {
                 set r " r $r"
