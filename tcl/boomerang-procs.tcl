@@ -175,7 +175,10 @@ namespace eval ::boomerang {
                     # - no *_time must be negative
                     # - check for unrealistic high t_done times (caused be technicalities)
                     set t_done [dict get $entries t_done]
-                    set time_fields { nt_start_time nt_tcp_time nt_request_time nt_response_time nt_processing_time }
+                    set time_fields {
+                        nt_start_time nt_tcp_time nt_request_time nt_response_time
+                        nt_processing_time nt_total_time
+                    }
                     foreach time_field $time_fields {
                         set v [dict get $entries $time_field]
                         if {$v < 0 || $v > $t_done} {
