@@ -27,7 +27,7 @@ FEATURES:
 - Support sampling (e.g. just obtain metrics from every nth request)
 
 - Output performance data in a format suitable for feeding into
-  Elasticsearch/Logstash (see below for a sample config file)
+  Elasticsearch/Logstash (see below for example config files)
 
 - Configure the appearance of the boomerang per subsite with
   the following parameters:
@@ -52,7 +52,7 @@ INSTALLATON:
  2) Add this package to the templating system
 
     - OpenACS 5.10.0d2 or newer:
-      The cookie consent widgets uses the "subsite::page_plugin"
+      The boomerang plugin uses the "subsite::page_plugin"
       callback, so no changes on templates are necessary.
 
       Make sure to update as well the acs-bootstrap-installer to
@@ -98,9 +98,9 @@ earlier versions as well, when CSP code is commented out.
 OPTIONAL: DEFINE A CUSTOM BOOMERANG PLUGIN
 ==========================================
 
- 1) clone boomerang repository
+ 1) Clone boomerang repository
  
- 2) install npm, grunt if necessary
+ 2) Install npm, grunt if necessary
 
  3) Follow step 2 in https://github.com/SOASTA/boomerang
     which means
@@ -130,7 +130,8 @@ the OpenACS log directory with a name boomerang-*.log (containing the date).
 Below are sample-snippets from OpenACS.org the log-files into elasticsearch,
 such that it can be analyzed later with kibana or grafana.
 
------------------------------------------------------------- sample filebeat entry
+Example filebeat  entry for the data feed:
+------------------------------------------------------------
     -
       paths:
         - /var/www/openacs.org/log/boomerang-*.log
@@ -140,7 +141,9 @@ such that it can be analyzed later with kibana or grafana.
 ------------------------------------------------------------
 
 
-------------------------------------------------------------matching input filter for logstash
+Example logststash entry (input filter for transforming the data from filebeat
+and to feed it into easticsearch)
+------------------------------------------------------------
   if [fields][log_type] == "boomerang-log" {
     json {
        source => "message"
