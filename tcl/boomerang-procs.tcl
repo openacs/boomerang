@@ -339,8 +339,9 @@ namespace eval ::boomerang {
 
                 set version_info [version_info]
                 set prefix [dict get $version_info prefix]
-
-                template::head::add_javascript -src $prefix/boomerang-${version}.min.js
+                foreach jsFile [dict get $version_info jsFiles] {
+                    template::head::add_javascript -src ${prefix}/$jsFile
+                }
                 #
                 # One could add additional plugins here, but many are
                 # already included in the provided .min.js file via the
@@ -414,11 +415,12 @@ namespace eval ::boomerang {
             set prefix $cdn/$version/
             lappend result host "cdnjs.cloudflare.com"
         }
+        
         lappend result \
             cdn $cdn \
             prefix $prefix \
             cssFiles {} \
-            jsFiles  [list boomerang.js]
+            jsFiles  [list boomerang-${version}.min.js]
 
         return $result
     }
