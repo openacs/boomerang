@@ -41,6 +41,8 @@ FEATURES:
   
 - Support for host-node-mapped subsites
 
+- Site-wide admin support for compressing .js file
+
 - Performance: include boomerang in the template costs about 0.3ms,
   processing of the beacon call takes about 1ms (filter times).
 

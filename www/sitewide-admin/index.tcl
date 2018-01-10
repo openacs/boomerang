@@ -1,8 +1,8 @@
-set title "Cookie Consent Sitewide Admin"
+set what "Boomerang Plugin"
+set title "Sitewide Admin for $what"
 set context [list $title]
 
 set resource_prefix [acs_package_root_dir boomerang/www/resources]
-set what "Boomerang Plugin"
 set version $::boomerang::version
 
 #
