@@ -139,6 +139,17 @@ namespace eval ::boomerang {
             #xotcl::Object log "boomerang::record start"
 
             set entries [ns_set array $ns_set]
+            
+            if {[ns_set size $ns_set] < 1 || ![dict exist $entries u]} {
+                ns_log notice "boomerang: no (valid) measurement variablables are provided"
+                return
+            } 
+
+            #
+            # We have a non-empty ns_set, that will not cause an
+            # exception below. Add aslwasys the peer address to the
+            # result dict.
+            #
             dict set entries clientip $peeraddr
 
             if {![dict exists $entries rt.tstart]} {
@@ -367,7 +378,8 @@ namespace eval ::boomerang {
 
                 template::head::add_javascript -order 2 -script [subst {
                     BOOMR.init({
-                        beacon_url: "$beaconURL"
+                        beacon_url: "$beaconURL",
+                        log: null
                     });
                 }]
             }
