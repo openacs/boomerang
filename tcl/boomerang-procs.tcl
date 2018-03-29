@@ -139,8 +139,8 @@ namespace eval ::boomerang {
             #xotcl::Object log "boomerang::record start"
 
             set entries [ns_set array $ns_set]
-            
-            if {[ns_set size $ns_set] < 1 || ![dict exist $entries u]} {
+
+            if {[ns_set size $ns_set] < 1 || ![dict exists $entries u]} {
                 ns_log notice "boomerang: no (valid) measurement variablables are provided"
                 return
             } 
