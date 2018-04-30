@@ -278,7 +278,7 @@ namespace eval ::boomerang {
         subsites to mapped subsite (when the host-node map points to a
         subsite) or the main subsite. This code makes sure, we can
         provide a URL on this site. We should distinguish between
-        cases where we provide an URL (e.g. the beacon) or just
+        cases where we provide a URL (e.g. the beacon) or just
         include stuff, in which case it works als well for host-node
         entries, which are no subsites..... but these cases are rare
         enough, such we don't care so far.
