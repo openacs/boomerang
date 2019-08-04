@@ -27,13 +27,13 @@ namespace eval ::boomerang {
     # plugin also via NaviServer config file:
     #
     #   ns_section ns/server/${server}/acs/boomerang
-    #      ns_param version 1.0.1514200883
+    #      ns_param version 1.0.0
     #
 
     set version [parameter::get \
                      -package_id $package_id \
                      -parameter Version \
-                     -default 1.0.1514200883]
+                     -default 1.0.0]
 
     #
     # Boomerang response handler
