@@ -152,12 +152,14 @@ namespace eval ::boomerang {
             #
             dict set entries clientip $peeraddr
 
-            if {![dict exists $entries rt.tstart]} {
+            if {[dict exists $entries err]} {
+                ad_log error "boomerang: returned error: [dict exists $entries err]"
+                set record 0
+            } elseif {![dict exists $entries rt.tstart]} {
                 ns_log notice "boomerang: no rt.tstart value in $entries"
                 set record 0
             } else {
                 dict set entries @timestamp [:ms_to_utc [dict get $entries rt.tstart]]
-
                 #
                 # Do we have W3C "Navigation Timing" information?
                 # Just record data containing this information.
