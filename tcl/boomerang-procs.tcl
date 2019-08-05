@@ -195,7 +195,7 @@ namespace eval ::boomerang {
                     }
                     foreach time_field $time_fields {
                         set v [dict get $entries $time_field]
-                        if {$v <= 0 || $v >= $max_time} {
+                        if {$v < 0 || $v >= $max_time} {
                             ns_log Warning "boomerang: strange value for $time_field: <$v> computed from $entries"
                             dict set entries $time_field 0
                         }
