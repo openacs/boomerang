@@ -143,17 +143,17 @@ namespace eval ::boomerang {
             if {[ns_set size $ns_set] < 1 || ![dict exists $entries u]} {
                 ns_log notice "boomerang: no (valid) measurement variablables are provided"
                 return
-            } 
+            }
 
             #
             # We have a non-empty ns_set, that will not cause an
-            # exception below. Add aslwasys the peer address to the
+            # exception below. Add always the peer address to the
             # result dict.
             #
             dict set entries clientip $peeraddr
 
             if {[dict exists $entries err]} {
-                ad_log error "boomerang: returned error: [dict exists $entries err]"
+                ad_log warning "boomerang: returned error: [dict get $entries err]"
                 set record 0
             } elseif {![dict exists $entries rt.tstart]} {
                 ns_log notice "boomerang: no rt.tstart value in $entries"
@@ -245,7 +245,7 @@ namespace eval ::boomerang {
                     -filename boomerang-[clock format [clock seconds] -format %Y-%m-%d].log
 
             }
-            
+
             #
             # Some common parameters:
             # https://docs.soasta.com/whatsinbeacon/#urls
@@ -430,7 +430,7 @@ namespace eval ::boomerang {
             set prefix $cdn/$version/
             lappend result host "cdnjs.cloudflare.com"
         }
-        
+
         lappend result \
             cdn $cdn \
             prefix $prefix \
