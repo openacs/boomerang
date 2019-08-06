@@ -153,7 +153,8 @@ namespace eval ::boomerang {
             dict set entries clientip $peeraddr
 
             if {[dict exists $entries err]} {
-                ad_log warning "boomerang: returned error: [dict get $entries err]"
+                ad_log warning "boomerang: returned error: [dict get $entries err]\n\
+                       Request-info:\n[util::request_info -with_headers]"
                 set record 0
             } elseif {![dict exists $entries rt.tstart]} {
                 ns_log notice "boomerang: no rt.tstart value in $entries"
@@ -170,7 +171,10 @@ namespace eval ::boomerang {
                 # t_done time span reaching to the original load of the
                 # page.
                 #
-                if {[dict exists $entries nt_con_st]} {
+                if {
+                    [dict exists $entries nt_con_st]
+                    && [dict exists $entries nt_req_st]
+                } {
                     #
                     # Add nt_*_time variables according to the "Navigation Timing" W3C recommendation
                     # up to domComplete (see https://www.w3.org/TR/navigation-timing/#processing-model)
@@ -205,7 +209,7 @@ namespace eval ::boomerang {
                     }
                     set record 1
                 } else {
-                    ns_log notice "boomerang: no nt_con_st value in $entries"
+                    ns_log notice "boomerang: no value for 'nt_con_st' or 'nt_req_st' in dict $entries"
                     set record 0
                 }
             }
