@@ -332,7 +332,11 @@ namespace eval ::boomerang {
                            -package_id $subsite_id \
                            -parameter BoomerangEnabled \
                            -default 0]
-        if {$enabled_p} {
+        #
+        # When the package is enabled, and we are not in a "bots"
+        # connection pool, look in more details.
+        #
+        if {$enabled_p && [ns_conn pool] ne "bots"} {
             #
             # Check, if we should sample this request
             #
