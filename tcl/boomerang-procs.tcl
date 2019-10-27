@@ -183,7 +183,7 @@ namespace eval ::boomerang {
                     dict set entries nt_tcp_time [expr {[dict get $entries nt_con_end] - [dict get $entries nt_con_st]}]
                     dict set entries nt_request_time [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
-                    if {![dict get $entries nt_domcomp]} {
+                    if {![dict exists $entries nt_domcomp]} {
                         dict set entries nt_processing_time 0
                     } else {
                         dict set entries nt_processing_time [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
