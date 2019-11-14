@@ -188,7 +188,11 @@ namespace eval ::boomerang {
                     } else {
                         dict set entries nt_processing_time [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
                     }
-                    dict set entries nt_total_time [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
+                    if {[dict exists $entries nt_load_end]} {
+                        dict set entries nt_total_time [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
+                    } else {
+                        dict set entries nt_total_time [dict get $entries t_done]
+                    }
 
                     #
                     # Sanity checks for the computed fields:
