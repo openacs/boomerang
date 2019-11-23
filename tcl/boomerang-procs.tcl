@@ -192,8 +192,10 @@ namespace eval ::boomerang {
                         dict set entries nt_total_time [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
                     } elseif {[dict exists $entries t_done]} {
                         dict set entries nt_total_time [dict get $entries t_done]
+                    } elseif {[dict exists $entries rt.end]} {
+                        dict set entries nt_total_time [expr {[dict get $entries rt.end] - [dict get $entries nt_nav_st]}]                        
                     } else {
-                        ns_log error "boomerang: cannot determine nt_total_time (no load_end nor t_done)\nentries: $entries"
+                        ns_log error "boomerang: cannot determine nt_total_time (no load_end, t_done, rt.end)\nentries: $entries"
                         error "cannot determine nt_total_time"
                     }
 
