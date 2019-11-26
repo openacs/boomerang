@@ -193,34 +193,40 @@ namespace eval ::boomerang {
                     } elseif {[dict exists $entries t_done]} {
                         dict set entries nt_total_time [dict get $entries t_done]
                     } elseif {[dict exists $entries rt.end]} {
-                        dict set entries nt_total_time [expr {[dict get $entries rt.end] - [dict get $entries nt_nav_st]}]                        
+                        dict set entries nt_total_time [expr {[dict get $entries rt.end] - [dict get $entries nt_nav_st]}]
+                        dict set entries t_done [dict get $entries nt_total_time]
                     } else {
                         ns_log error "boomerang: cannot determine nt_total_time (no load_end, t_done, rt.end)\nentries: $entries"
                         error "cannot determine nt_total_time"
                     }
 
-                    #
-                    # Sanity checks for the computed fields:
-                    # - no *_time can be larger than t_done
-                    # - no *_time must be negative
-                    # - check for unrealistic high t_done times (caused be technicalities)
-                    set t_done [dict get $entries t_done]
-                    set max_time [expr {$t_done + 1}]
-                    set time_fields {
-                        nt_start_time nt_tcp_time nt_request_time nt_response_time
-                        nt_processing_time nt_total_time
-                    }
-                    foreach time_field $time_fields {
-                        set v [dict get $entries $time_field]
-                        if {$v < 0 || $v > $max_time} {
-                            ns_log Warning "boomerang: strange value for $time_field: <$v> computed from $entries"
-                            dict set entries $time_field 0
+                    if {[info exists t_done]} {
+                        #
+                        # Sanity checks for the computed fields:
+                        # - no *_time can be larger than t_done
+                        # - no *_time must be negative
+                        # - check for unrealistic high t_done times (caused be technicalities)
+                        set t_done [dict get $entries t_done]
+                        set max_time [expr {$t_done + 1}]
+                        set time_fields {
+                            nt_start_time nt_tcp_time nt_request_time nt_response_time
+                            nt_processing_time nt_total_time
                         }
+                        foreach time_field $time_fields {
+                            set v [dict get $entries $time_field]
+                            if {$v < 0 || $v > $max_time} {
+                                ns_log warning "boomerang: strange value for $time_field: <$v> computed from $entries"
+                                dict set entries $time_field 0
+                            }
+                        }
+                        if {[dict get $entries nt_total_time] + 500 < $t_done} {
+                            ns_log warning "boomerang: nt_total_time [dict get $entries nt_total_time] < t_done $t_done"
+                        }
+                        ns_log warning "boomerang: no value for 't_done' in dict $entries"
+                        set record 1
+                    } else {
+                        set record 0
                     }
-                    if {[dict get $entries nt_total_time] + 500 < $t_done} {
-                        ns_log Warning "boomerang: nt_total_time [dict get $entries nt_total_time] < t_done $t_done"
-                    }
-                    set record 1
                 } else {
                     ns_log notice "boomerang: no value for 'nt_con_st' or 'nt_req_st' in dict $entries"
                     set record 0
