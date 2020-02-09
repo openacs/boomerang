@@ -20,9 +20,15 @@ set writable [file writable $resource_prefix]
 if {$writable} {
     ns_log notice "check for <$plainFile.gz>"
     if {[file exists $plainFile.gz]} {
-	set compressedFile $plainFile.gz
+        set compressedFile $plainFile.gz
     }
 } else {
     set path $resource_prefix
 }
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:
