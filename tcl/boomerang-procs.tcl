@@ -367,7 +367,7 @@ namespace eval ::boomerang {
                 set sample 1
             }
 
-            if {[nsv_incr boomerange counter] % $sample == 0} {
+            if {[nsv_incr boomerang counter] % $sample == 0} {
                 #
                 # Yes, we can!
                 #
@@ -428,7 +428,7 @@ namespace eval ::boomerang {
 
     } {
         #
-        # If no version of the boomerange library was specified,
+        # If no version of the boomerang library was specified,
         # use the name-spaced variable as default.
         #
         if {$version eq ""} {
