@@ -146,7 +146,7 @@ namespace eval ::boomerang {
             }
 
             #
-            # We have a non-empty ns_set, that will not cause an
+            # We have a nonempty ns_set, that will not cause an
             # exception below. Add always the peer address to the
             # result dict.
             #
@@ -423,7 +423,7 @@ namespace eval ::boomerang {
     } {
 
         Get information about available version(s) of the
-        boomerang packages, either from the local file system, or
+        boomerang packages, either from the local filesystem, or
         from CDN.
 
     } {
