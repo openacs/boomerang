@@ -1,6 +1,6 @@
 #
 # We should get the URL from the parameter and register this for every
-# toplevel subsite, on which boomerang is enabled
+# top-level subsite, on which boomerang is enabled
 #
 foreach url {/} {
 
