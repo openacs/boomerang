@@ -34,8 +34,8 @@ in particular with OpenACS subsites.
         <maturity>0</maturity>
 
         <provides url="boomerang" version="0.4"/>
-        <requires url="acs-templating" version="5.10.0b1"/>
-        <requires url="acs-tcl" version="5.10.0b1"/>
+        <requires url="acs-templating" version="5.10.0"/>
+        <requires url="acs-tcl" version="5.10.0"/>
 
 	<callbacks>
           <callback type="before-uninstall"  proc="::boomerang::before-uninstall"/>
