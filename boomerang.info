@@ -29,7 +29,7 @@ Details:
 This package integrates boomerang with OpenACS,
 in particular with OpenACS subsites.
 	</summary>
-        <release-date>2018-01-02</release-date>
+        <release-date>2021-09-15</release-date>
 	<license>BSD License</license>
         <maturity>0</maturity>
 
