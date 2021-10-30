@@ -141,7 +141,7 @@ namespace eval ::boomerang {
             set entries [ns_set array $ns_set]
 
             if {[ns_set size $ns_set] < 1 || ![dict exists $entries u]} {
-                ns_log notice "boomerang: no (valid) measurement variablables are provided"
+                ns_log notice "boomerang: no (valid) measurement variables are provided"
                 return
             }
 
