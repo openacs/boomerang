@@ -84,7 +84,7 @@ namespace eval ::boomerang {
             set :json_map($orig) $new
         }
 
-        :object method ms_to_utc {ms} {
+        :object method ms_to_utc {ms:integer} {
             set seconds [expr {$ms / 1000}]
             set fraction [format %03d [expr {$ms - ($seconds * 1000)}]]
             return [clock format $seconds -format "%Y-%m-%dT%H:%M:%S" -gmt 1].${fraction}Z
@@ -158,6 +158,9 @@ namespace eval ::boomerang {
                 set record 0
             } elseif {![dict exists $entries rt.tstart]} {
                 ns_log notice "boomerang: no rt.tstart value in $entries"
+                set record 0
+            } elseif {![string is integer -strict [dict get $entries rt.tstart]]} {
+                ns_log notice "boomerang: rt.tstart is not a valid timestamp <[dict get $entries rt.tstart]>"
                 set record 0
             } else {
                 dict set entries @timestamp [:ms_to_utc [dict get $entries rt.tstart]]
