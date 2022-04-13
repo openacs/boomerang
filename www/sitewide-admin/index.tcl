@@ -12,10 +12,12 @@ set version $::boomerang::version
 set version_info [::boomerang::version_info]
 set prefix [dict get $version_info prefix]
 set jsFile [lindex [dict get $version_info jsFiles] 0]
+set downloadURL [lindex [dict get $version_info downloadURLs] 0]
 set plainFile $resource_prefix/$jsFile
 set gzip [::util::which gzip]
 
 set writable [file writable $resource_prefix]
+set jsFileExists [file readable $plainFile]
 
 if {$writable} {
     ns_log notice "check for <$plainFile.gz>"

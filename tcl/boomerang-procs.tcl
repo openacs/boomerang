@@ -27,13 +27,13 @@ namespace eval ::boomerang {
     # plugin also via NaviServer config file:
     #
     #   ns_section ns/server/${server}/acs/boomerang
-    #      ns_param version 1.0.0
+    #      ns_param version 1.737.0
     #
 
     set version [parameter::get \
                      -package_id $package_id \
                      -parameter Version \
-                     -default 1.0.0]
+                     -default 1.737.0]
 
     #
     # Boomerang response handler
@@ -342,7 +342,7 @@ namespace eval ::boomerang {
         Initialize an boomerang widget.
 
     } {
-        #set t0 [clock clicks -microseconds]
+        set t0 [clock clicks -microseconds]
         if {$subsite_id eq ""} {
             set subsite_id [get_relevant_subsite]
         }
@@ -353,7 +353,7 @@ namespace eval ::boomerang {
         set enabled_p [parameter::get \
                            -package_id $subsite_id \
                            -parameter BoomerangEnabled \
-                           -default 0]
+                           -default 1]
         #
         # When the package is enabled, and we are not in a "bots"
         # connection pool, look in more details.
@@ -383,6 +383,7 @@ namespace eval ::boomerang {
 
                 set version_info [version_info]
                 set prefix [dict get $version_info prefix]
+                ns_log notice "XXXX boomerang prefix <$prefix>"
                 foreach jsFile [dict get $version_info jsFiles] {
                     template::head::add_javascript -src ${prefix}/$jsFile
                 }
@@ -408,6 +409,7 @@ namespace eval ::boomerang {
                 #        "plugins/usertiming.js",
                 #        "plugins/mq.js"
                 #
+                template::head::add_javascript -src ${prefix}/plugins-$version/rt.js
 
                 template::head::add_javascript -order 2 -script [subst {
                     BOOMR.init({
@@ -417,7 +419,7 @@ namespace eval ::boomerang {
                 }]
             }
         }
-        #ns_log notice "boomerang::initialize_widget [expr {[clock clicks -microseconds] - $t0}] microseconds"
+        ns_log notice "boomerang::initialize_widget (enabled $enabled_p) [expr {[clock clicks -microseconds] - $t0}] microseconds"
     }
 
 
@@ -441,20 +443,21 @@ namespace eval ::boomerang {
         #
         # Provide paths for loading either via resources or CDN
         #
-        set resource_prefix [acs_package_root_dir boomerang/www/resources]
-        set cdn             "//cdnjs.cloudflare.com/ajax/libs"
+        set resourceDir [acs_package_root_dir boomerang/www/resources]
+        set resourceUrl /resources/boomerang
+        set cdnHost     cdnjs.cloudflare.com
+        set cdn         //$cdnHost/ajax/libs
 
-        #
-        # If the resources are not available locally, these will be
-        # loaded via CDN and the CDN host is set (necessary for CSP).
-        # The returned "prefix" indicates the place, from where the
-        # resource will be loaded.
-        #
-        if {[file exists $resource_prefix]} {
-            set prefix /resources/boomerang
+        if {[file exists $resourceDir/boomerang-$version]} {
+            #
+            # Local version is installed
+            #
+            set prefix  $resourceUrl
+            set cdnHost ""
+            set cspMap ""
         } else {
             #
-            # So far there is no CDN form boomerang, we distribute
+            # So far, there is no CDN form boomerang, we distribute
             # boomerang.js via static file.
             #
             set prefix $cdn/$version/
@@ -462,10 +465,17 @@ namespace eval ::boomerang {
         }
 
         lappend result \
+            resourceName "Boomerang" \
+            resourceDir $resourceDir \
             cdn $cdn \
+            cdnHost $cdnHost \
             prefix $prefix \
             cssFiles {} \
-            jsFiles  [list boomerang-${version}.min.js]
+            jsFiles  [list boomerang-${version}.js] \
+            extraFiles {} \
+            downloadURLs https://github.com/akamai/boomerang/archive/refs/tags/1.737.0.tar.gz \
+            cspMap {} \
+            urnMap {}
 
         return $result
     }
