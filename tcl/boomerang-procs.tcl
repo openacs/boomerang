@@ -448,7 +448,7 @@ namespace eval ::boomerang {
         set cdnHost     cdnjs.cloudflare.com
         set cdn         //$cdnHost/ajax/libs
 
-        if {[file exists $resourceDir/boomerang-$version]} {
+        if {[file exists $resourceDir/boomerang-$version.js]} {
             #
             # Local version is installed
             #
