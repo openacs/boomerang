@@ -1,3 +1,7 @@
+ad_page_contract {
+    Sitewide Admin UI for Boomerang Plugin
+}
+
 set what "Boomerang Plugin"
 set title "Sitewide Admin for $what"
 set context [list $title]
