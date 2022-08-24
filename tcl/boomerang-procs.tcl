@@ -152,6 +152,10 @@ namespace eval ::boomerang {
             #
             dict set entries clientip $peeraddr
 
+            if {![dict exists $entries rt.tstart] && [dict exists $entries nt_nav_st]} {
+                dict set entries rt.tstart [dict get $entries nt_nav_st]
+            }
+
             if {[dict exists $entries err]} {
                 ad_log warning "boomerang: returned error: [dict get $entries err]\n\
                        Request-info:\n[util::request_info -with_headers]"
@@ -159,7 +163,7 @@ namespace eval ::boomerang {
             } elseif {![dict exists $entries rt.tstart]} {
                 ns_log notice "boomerang: no rt.tstart value in $entries"
                 set record 0
-            } elseif {![string is integer -strict [dict get $entries rt.tstart]]} {
+            } elseif {![string is entier -strict [dict get $entries rt.tstart]]} {
                 ns_log notice "boomerang: rt.tstart is not a valid timestamp <[dict get $entries rt.tstart]>"
                 set record 0
             } else {
@@ -383,7 +387,6 @@ namespace eval ::boomerang {
 
                 set version_info [version_info]
                 set prefix [dict get $version_info prefix]
-                ns_log notice "XXXX boomerang prefix <$prefix>"
                 foreach jsFile [dict get $version_info jsFiles] {
                     template::head::add_javascript -src ${prefix}/$jsFile
                 }
@@ -409,12 +412,17 @@ namespace eval ::boomerang {
                 #        "plugins/usertiming.js",
                 #        "plugins/mq.js"
                 #
-                template::head::add_javascript -src ${prefix}/plugins-$version/rt.js
+                template::head::add_javascript -src ${prefix}/plugins-$version/navtiming.js
+                #template::head::add_javascript -src ${prefix}/plugins-$version/rt.js
 
                 template::head::add_javascript -order 2 -script [subst {
                     BOOMR.init({
                         beacon_url: "$beaconURL",
-                        log: null
+                        log: null,
+                        NavigationTiming: {
+                            enabled: true,
+                            clearOnBeacon: true
+                        }
                     });
                 }]
             }
