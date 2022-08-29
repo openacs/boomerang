@@ -306,19 +306,23 @@ namespace eval ::boomerang {
             #  - r:   URL of previous page that Boomerang wrote into a cookie
             #  - u:   URL of Page, XHR or SPA route that caused the beacon
             #
-            if {![dict exists $entries r]} {
-                set r ""
-            } else {
-                set r [dict get $entries r]
+            try {
+                if {![dict exists $entries r]} {
+                    set r ""
+                } else {
+                    set r [dict get $entries r]
+                }
+                set u   [dict get $entries u]
+                set pid [dict get $entries pid]
+                if {$r ne "" && $r ne $u} {
+                    set r " r $r"
+                } else {
+                    set r ""
+                }
+                ns_log notice "boomerang::record done $record $pid [ns_conn method] u $u$r record $record total [expr {[clock clicks -microseconds] - $t0}] microseconds record [expr {[clock clicks -microseconds] - $t1}] "
+            } on error {errorMsg} {
+                ns_log error "boomerang: cleanup lead to error: $errorMsg"
             }
-            set u   [dict get $entries u]
-            set pid [dict get $entries pid]
-            if {$r ne "" && $r ne $u} {
-                set r " r $r"
-            } else {
-                set r ""
-            }
-            ns_log notice "boomerang::record done $pid [ns_conn method] u $u$r record $record total [expr {[clock clicks -microseconds] - $t0}] microseconds record [expr {[clock clicks -microseconds] - $t1}] "
         }
     }
 
@@ -447,7 +451,8 @@ namespace eval ::boomerang {
                 }]
             }
         }
-        ns_log notice "boomerang::initialize_widget (enabled $enabled_p) [expr {[clock clicks -microseconds] - $t0}] microseconds"
+        #ns_log notice "boomerang::initialize_widget (enabled $enabled_p)" \
+            "[expr {[clock clicks -microseconds] - $t0}] microseconds"
     }
 
 
