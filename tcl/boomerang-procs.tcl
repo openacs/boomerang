@@ -172,22 +172,36 @@ namespace eval ::boomerang {
                 # Do we have W3C "Navigation Timing" information?
                 # Just record data containing this information.
                 #
-                # Other entries have often strange t_done values: e.g. a
-                # reload of a page, having an automatic refresh after many
-                # refreshes will cause such a beacon GET request with a
-                # t_done time span reaching to the original load of the
-                # page.
+                # Other entries have often strange t_done values:
+                # e.g., a reload of a page, having an automatic
+                # refresh after many refreshes will cause such a
+                # beacon GET request with a t_done time span reaching
+                # to the original load of the page.
                 #
-                if {
-                    [dict exists $entries nt_con_st]
-                    && [dict exists $entries nt_req_st]
-                } {
+                # Examples:
+                #    `nt_nav_st`:  `performance.timing.navigationStart`
+                #    `nt_con_st`:  `performance.timing.connectStart`
+                #    `nt_con_end`: `performance.timing.connectEnd`
+                #    `nt_req_st`:  `performance.timing.requestStart`
+
+                if {[dict exists $entries nt_req_st] && [dict exists $entries nt_nav_st]} {
                     #
                     # Add nt_*_time variables according to the "Navigation Timing" W3C recommendation
                     # up to domComplete (see https://www.w3.org/TR/navigation-timing/#processing-model)
                     #
                     dict set entries nt_start_time [expr {[dict get $entries nt_req_st] - [dict get $entries nt_nav_st]}]
-                    dict set entries nt_tcp_time [expr {[dict get $entries nt_con_end] - [dict get $entries nt_con_st]}]
+
+                    if {![dict exists $entries nt_con_st]} {
+                        #
+                        # Sometimes, nt_con_st and nt_con_end are
+                        # missing.  In such cases, we have probably an
+                        # already established connection. Therefore,
+                        # set nt_tcp_time to 0.
+                        dict set entries nt_tcp_time 0
+                    } else {
+                        dict set entries nt_tcp_time [expr {[dict get $entries nt_con_end] - [dict get $entries nt_con_st]}]
+                    }
+
                     dict set entries nt_request_time [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
                     if {![dict exists $entries nt_domcomp]} {
@@ -235,7 +249,7 @@ namespace eval ::boomerang {
                         set record 0
                     }
                 } else {
-                    ns_log notice "boomerang: no value for 'nt_con_st' or 'nt_req_st' in dict $entries"
+                    ns_log notice "boomerang: no value for 'nt_nav_st' or 'nt_req_st' in dict $entries"
                     set record 0
                 }
             }
