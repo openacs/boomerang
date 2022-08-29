@@ -183,6 +183,7 @@ namespace eval ::boomerang {
                 #    `nt_con_st`:  `performance.timing.connectStart`
                 #    `nt_con_end`: `performance.timing.connectEnd`
                 #    `nt_req_st`:  `performance.timing.requestStart`
+                #    `nt_load_end`:`performance.timing.loadEventEnd`
 
                 if {[dict exists $entries nt_req_st] && [dict exists $entries nt_nav_st]} {
                     #
@@ -204,6 +205,11 @@ namespace eval ::boomerang {
 
                     dict set entries nt_request_time [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
+
+                    if {![dict exists $entries t_done]} {
+                        dict set entries t_done [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
+                    }
+
                     if {![dict exists $entries nt_domcomp]} {
                         dict set entries nt_processing_time 0
                     } else {
@@ -221,7 +227,7 @@ namespace eval ::boomerang {
                         error "cannot determine nt_total_time"
                     }
 
-                    if {[info exists t_done]} {
+                    if {[dict exists $entries t_done]} {
                         #
                         # Sanity checks for the computed fields:
                         # - no *_time can be larger than t_done
@@ -243,9 +249,9 @@ namespace eval ::boomerang {
                         if {[dict get $entries nt_total_time] + 500 < $t_done} {
                             ns_log warning "boomerang: nt_total_time [dict get $entries nt_total_time] < t_done $t_done"
                         }
-                        ns_log warning "boomerang: no value for 't_done' in dict $entries"
                         set record 1
                     } else {
+                        ns_log warning "boomerang: no value for 't_done' in dict $entries"
                         set record 0
                     }
                 } else {
