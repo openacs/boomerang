@@ -206,7 +206,11 @@ namespace eval ::boomerang {
                     dict set entries nt_request_time [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
 
-                    if {![dict exists $entries t_done]} {
+                    if {![dict exists $entries nt_load_end]} {
+                        ns_log warning "boomerang: no value for 'nt_load_end' in dict [lsort [dict keys $entries]]"
+                    }
+
+                    if {![dict exists $entries t_done] && [dict exists $entries nt_load_end]} {
                         dict set entries t_done [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
                     }
 
