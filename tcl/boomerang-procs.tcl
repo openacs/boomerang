@@ -207,7 +207,12 @@ namespace eval ::boomerang {
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
 
                     if {![dict exists $entries nt_load_end]} {
-                        ns_log warning "boomerang: no value for 'nt_load_end' in dict [lsort [dict keys $entries]]"
+                        if {[dict exists $entries nt_domcontloaded_end]} {
+                            dict set entries nt_load_end [dict get $entries nt_domcontloaded_end]
+                            ns_log warning "boomerang: substitute 'nt_load_end' by 'nt_domcontloaded_end'"
+                        } else {
+                            ns_log warning "boomerang: no value for 'nt_load_end' in dict [lsort [dict keys $entries]]"
+                        }
                     }
 
                     if {![dict exists $entries t_done] && [dict exists $entries nt_load_end]} {
@@ -219,6 +224,7 @@ namespace eval ::boomerang {
                     } else {
                         dict set entries nt_processing_time [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
                     }
+
                     if {[dict exists $entries nt_load_end]} {
                         dict set entries nt_total_time [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
                     } elseif {[dict exists $entries t_done]} {
