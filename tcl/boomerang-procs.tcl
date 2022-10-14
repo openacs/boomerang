@@ -207,10 +207,15 @@ namespace eval ::boomerang {
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
 
                     if {![dict exists $entries nt_load_end]} {
-                        if {[dict exists $entries nt_domcontloaded_end]} {
-                            dict set entries nt_load_end [dict get $entries nt_domcontloaded_end]
-                            ns_log warning "boomerang: substitute 'nt_load_end' by 'nt_domcontloaded_end'"
-                        } else {
+                        set alternative_ends {nt_domcontloaded_end nt_first_paint}
+                        foreach var $alternative_ends {
+                            if {[dict exists $entries $var]} {
+                                dict set entries nt_load_end [dict get $entries $var]
+                                ns_log warning "boomerang: substitute 'nt_load_end' by '$var'"
+                                break
+                            }
+                        }
+                        if {![dict exists $entries nt_load_end]} {
                             ns_log warning "boomerang: no value for 'nt_load_end' in dict [lsort [dict keys $entries]]"
                         }
                     }
