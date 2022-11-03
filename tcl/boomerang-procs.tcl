@@ -207,17 +207,21 @@ namespace eval ::boomerang {
                     dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
 
                     if {![dict exists $entries nt_load_end]} {
-                        set alternative_ends {nt_domcontloaded_end nt_first_paint}
-                        foreach var $alternative_ends {
-                            if {[dict exists $entries $var]} {
-                                dict set entries nt_load_end [dict get $entries $var]
-                                ns_log warning "boomerang: substitute 'nt_load_end' by '$var'"
-                                break
-                            }
-                        }
-                        if {![dict exists $entries nt_load_end]} {
-                            ns_log warning "boomerang: no value for 'nt_load_end' in dict [lsort [dict keys $entries]]"
-                        }
+                        #
+                        # When client comes to a premature end, take
+                        # the latest time. Note that some values below
+                        # might become negative in such situations,
+                        # but this is handled via sanity checks.
+                        #
+                        set l1 [lsort -integer -stride 2 -index 1 [concat {*}[lmap {key value} $l {
+                            if {![string is entier -strict $value]} continue
+                            list $key $value
+                        }]]]
+                        set latest_value [lindex $l1 end]
+                        ns_log warning "boomerang: set missing 'nt_load_end' to latest value from " \
+                            [lindex $l1 end-1] $latest_value \n\
+                            $l1
+                        dict set nt_load_end $latest_value                        
                     }
 
                     if {![dict exists $entries t_done] && [dict exists $entries nt_load_end]} {
@@ -227,6 +231,7 @@ namespace eval ::boomerang {
                     if {![dict exists $entries nt_domcomp]} {
                         dict set entries nt_processing_time 0
                     } else {
+                        set timediff [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
                         dict set entries nt_processing_time [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
                     }
 
