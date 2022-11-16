@@ -213,6 +213,7 @@ namespace eval ::boomerang {
                         # might become negative in such situations,
                         # but this is handled via sanity checks.
                         #
+                        set l $entries
                         set l1 [lsort -integer -stride 2 -index 1 [concat {*}[lmap {key value} $l {
                             if {![string is entier -strict $value]} continue
                             list $key $value
