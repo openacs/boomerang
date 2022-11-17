@@ -15,7 +15,6 @@ ad_library {
 
     @author Gustaf Neumann
     @creation-date 2 Jan 2018
-    @cvs-id $Id$
 }
 
 namespace eval ::boomerang {
@@ -222,7 +221,7 @@ namespace eval ::boomerang {
                         ns_log warning "boomerang: set missing 'nt_load_end' to latest value from " \
                             [lindex $l1 end-1] $latest_value \n\
                             $l1
-                        dict set nt_load_end $latest_value                        
+                        dict set entries nt_load_end $latest_value                        
                     }
 
                     if {![dict exists $entries t_done] && [dict exists $entries nt_load_end]} {
