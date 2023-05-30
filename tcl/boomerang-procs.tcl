@@ -133,6 +133,25 @@ namespace eval ::boomerang {
             return "{[join $result ,]}"
         }
 
+        :object method latest_value {entries field} {
+            #
+            # When client comes to a premature end, take
+            # the latest time. Note that some values below
+            # might become negative in such situations,
+            # but this is handled via sanity checks.
+            #
+            set l $entries
+            set l1 [lsort -integer -stride 2 -index 1 [concat {*}[lmap {key value} $l {
+                if {![string is entier -strict $value]} continue
+                list $key $value
+            }]]]
+            set latest_value [lindex $l1 end]
+            ns_log warning "boomerang: set missing '$field' to latest value from " \
+                [lindex $l1 end-1] $latest_value \n\
+                $l1
+            return $latest_value
+        }
+
         :public object method record {-ns_set:required -peeraddr:required} {
             set t0 [clock clicks -microseconds]
             #xotcl::Object log "boomerang::record start"
@@ -199,48 +218,47 @@ namespace eval ::boomerang {
                         # set nt_tcp_time to 0.
                         dict set entries nt_tcp_time 0
                     } else {
-                        dict set entries nt_tcp_time [expr {[dict get $entries nt_con_end] - [dict get $entries nt_con_st]}]
+                        dict set entries nt_tcp_time \
+                            [expr {[dict get $entries nt_con_end] - [dict get $entries nt_con_st]}]
                     }
 
-                    dict set entries nt_request_time [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
-                    dict set entries nt_response_time [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
+                    dict set entries nt_request_time \
+                        [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
 
-                    if {![dict exists $entries nt_load_end]} {
-                        #
-                        # When client comes to a premature end, take
-                        # the latest time. Note that some values below
-                        # might become negative in such situations,
-                        # but this is handled via sanity checks.
-                        #
-                        set l $entries
-                        set l1 [lsort -integer -stride 2 -index 1 [concat {*}[lmap {key value} $l {
-                            if {![string is entier -strict $value]} continue
-                            list $key $value
-                        }]]]
-                        set latest_value [lindex $l1 end]
-                        ns_log warning "boomerang: set missing 'nt_load_end' to latest value from " \
-                            [lindex $l1 end-1] $latest_value \n\
-                            $l1
-                        dict set entries nt_load_end $latest_value                        
+                    #
+                    # Sometimes, when requests are interupted, the *end
+                    # time is missing, although the *start time is
+                    # available.
+                    #
+                    foreach field {nt_res_end nt_load_end} {
+                        if {![dict exists $entries $field]} {
+                            dict set $entries set nt_res_end [:latest_value $entries $field]
+                        }
                     }
+                    dict set entries nt_response_time \
+                        [expr {[dict get $entries nt_res_end] - [dict get $entries nt_res_st]}]
 
-                    if {![dict exists $entries t_done] && [dict exists $entries nt_load_end]} {
-                        dict set entries t_done [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
+                    if {![dict exists $entries t_done]} {
+                        dict set entries t_done \
+                            [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
                     }
 
                     if {![dict exists $entries nt_domcomp]} {
                         dict set entries nt_processing_time 0
                     } else {
                         set timediff [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
-                        dict set entries nt_processing_time [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
+                        dict set entries nt_processing_time \
+                            [expr {[dict get $entries nt_domcomp] - [dict get $entries nt_res_end]}]
                     }
 
                     if {[dict exists $entries nt_load_end]} {
-                        dict set entries nt_total_time [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
+                        dict set entries nt_total_time \
+                            [expr {[dict get $entries nt_load_end] - [dict get $entries nt_nav_st]}]
                     } elseif {[dict exists $entries t_done]} {
                         dict set entries nt_total_time [dict get $entries t_done]
                     } elseif {[dict exists $entries rt.end]} {
-                        dict set entries nt_total_time [expr {[dict get $entries rt.end] - [dict get $entries nt_nav_st]}]
+                        dict set entries nt_total_time \
+                            [expr {[dict get $entries rt.end] - [dict get $entries nt_nav_st]}]
                         dict set entries t_done [dict get $entries nt_total_time]
                     } else {
                         ns_log error "boomerang: cannot determine nt_total_time (no load_end, t_done, rt.end)\nentries: $entries"
