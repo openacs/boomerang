@@ -232,7 +232,7 @@ namespace eval ::boomerang {
                     #
                     foreach field {nt_res_end nt_load_end} {
                         if {![dict exists $entries $field]} {
-                            dict set $entries set nt_res_end [:latest_value $entries $field]
+                            dict set entries $field [:latest_value $entries $field]
                         }
                     }
                     dict set entries nt_response_time \
