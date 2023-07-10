@@ -226,7 +226,7 @@ namespace eval ::boomerang {
                         [expr {[dict get $entries nt_res_st] - [dict get $entries nt_req_st]}]
 
                     #
-                    # Sometimes, when requests are interupted, the *end
+                    # Sometimes, when requests are interrupted, the *end
                     # time is missing, although the *start time is
                     # available.
                     #
