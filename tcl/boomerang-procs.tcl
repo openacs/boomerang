@@ -515,7 +515,6 @@ namespace eval ::boomerang {
         # Provide paths for loading either via resources or CDN
         #
         set resourceDir [acs_package_root_dir boomerang/www/resources]
-        set resourceUrl /resources/boomerang
         set cdnHost     cdnjs.cloudflare.com
         set cdn         //$cdnHost/ajax/libs
 
@@ -523,9 +522,9 @@ namespace eval ::boomerang {
             #
             # Local version is installed
             #
-            set prefix  $resourceUrl
+            set prefix  /resources/boomerang
             set cdnHost ""
-            set cspMap ""
+            set cspMap  ""
         } else {
             #
             # So far, there is no CDN form boomerang, we distribute
