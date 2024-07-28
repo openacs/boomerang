@@ -3,7 +3,7 @@ ad_page_contract {
 
     @creation-date Jan 10, 2018
 } {
-    {version:word,notnull ""}
+    {version:token,notnull ""}
 }
 
 set resource_prefix [acs_package_root_dir boomerang/www/resources]

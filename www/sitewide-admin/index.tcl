@@ -7,13 +7,13 @@ set title "Sitewide Admin for $what"
 set context [list $title]
 
 set resource_prefix [acs_package_root_dir boomerang/www/resources]
-set version $::boomerang::version
 
+set version_info [::boomerang::version_info]
+set version [dict get $resource_info installedVersion]
 #
 # Get version info about the resource files of this package. If not
 # locally installed, offer a link for download.
 #
-set version_info [::boomerang::version_info]
 set prefix [dict get $version_info prefix]
 set jsFile [lindex [dict get $version_info jsFiles] 0]
 set downloadURL [lindex [dict get $version_info downloadURLs] 0]
