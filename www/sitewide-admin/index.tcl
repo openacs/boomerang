@@ -9,7 +9,7 @@ set context [list $title]
 set resource_prefix [acs_package_root_dir boomerang/www/resources]
 
 set version_info [::boomerang::version_info]
-set version [dict get $resource_info installedVersion]
+set version [dict get $resource_info configuredVersion]
 #
 # Get version info about the resource files of this package. If not
 # locally installed, offer a link for download.

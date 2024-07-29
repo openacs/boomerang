@@ -546,7 +546,7 @@ namespace eval ::boomerang {
             downloadURLs https://github.com/akamai/boomerang/archive/refs/tags/1.737.0.tar.gz \
             cspMap {} \
             urnMap {} \
-            installedVersion $version
+            configuredVersion $version
 
         return $result
     }
