@@ -18,9 +18,7 @@ ad_library {
 }
 
 namespace eval ::boomerang {
-
-    set package_id [apm_package_id_from_key "boomerang"]
-
+    variable parameter_info
     #
     # It is possible to configure the version of the boomerang
     # plugin also via NaviServer config file:
@@ -28,11 +26,11 @@ namespace eval ::boomerang {
     #   ns_section ns/server/${server}/acs/boomerang
     #      ns_param version 1.737.0
     #
-
-    set version [parameter::get \
-                     -package_id $package_id \
-                     -parameter Version \
-                     -default 1.737.0]
+    set parameter_info {
+        package_key boomerang
+        parameter_name BootstrapVersion
+        default_value 1.737.0
+    }
 
     #
     # Boomerang response handler
@@ -412,9 +410,9 @@ namespace eval ::boomerang {
         if {$subsite_id eq ""} {
             set subsite_id [get_relevant_subsite]
         }
-        if {$version eq ""} {
-            set version ${::boomerang::version}
-        }
+
+        set resource_info [resource_info -version $version]
+        set version [dict get $resource_info configuredVersion]
 
         set enabled_p [parameter::get \
                            -package_id $subsite_id \
@@ -447,9 +445,8 @@ namespace eval ::boomerang {
                                    -parameter BoomerangBeaconUrl \
                                    -default /boomerang_handler]
 
-                set version_info [version_info]
-                set prefix [dict get $version_info prefix]
-                foreach jsFile [dict get $version_info jsFiles] {
+                set prefix [dict get $resource_info prefix]
+                foreach jsFile [dict get $resource_info jsFiles] {
                     template::head::add_javascript -src ${prefix}/$jsFile
                 }
                 #
@@ -494,7 +491,7 @@ namespace eval ::boomerang {
     }
 
 
-    ad_proc version_info {
+    ad_proc resource_info {
         {-version ""}
     } {
 
@@ -503,12 +500,18 @@ namespace eval ::boomerang {
         from CDN.
 
     } {
+        variable parameter_info
         #
         # If no version of the boomerang library was specified,
         # use the name-spaced variable as default.
         #
         if {$version eq ""} {
-            set version ${::boomerang::version}
+            dict with parameter_info {
+                set version [::parameter::get_global_value \
+                                 -package_key $package_key \
+                                 -parameter $parameter_name \
+                                 -default $default_value]
+            }
         }
 
         #
@@ -537,6 +540,7 @@ namespace eval ::boomerang {
         lappend result \
             resourceName "Boomerang" \
             resourceDir $resourceDir \
+            versionSegment "" \
             cdn $cdn \
             cdnHost $cdnHost \
             prefix $prefix \
@@ -546,6 +550,7 @@ namespace eval ::boomerang {
             downloadURLs https://github.com/akamai/boomerang/archive/refs/tags/1.737.0.tar.gz \
             cspMap {} \
             urnMap {} \
+            parameterInfo $parameter_info \
             configuredVersion $version
 
         return $result

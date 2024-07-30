@@ -8,15 +8,15 @@ set context [list $title]
 
 set resource_prefix [acs_package_root_dir boomerang/www/resources]
 
-set version_info [::boomerang::version_info]
+set resource_info [::boomerang::resource_info]
 set version [dict get $resource_info configuredVersion]
 #
 # Get version info about the resource files of this package. If not
 # locally installed, offer a link for download.
 #
-set prefix [dict get $version_info prefix]
-set jsFile [lindex [dict get $version_info jsFiles] 0]
-set downloadURL [lindex [dict get $version_info downloadURLs] 0]
+set prefix [dict get $resource_info prefix]
+set jsFile [lindex [dict get $resource_info jsFiles] 0]
+set downloadURL [lindex [dict get $resource_info downloadURLs] 0]
 set plainFile $resource_prefix/$jsFile
 set gzip [::util::which gzip]
 

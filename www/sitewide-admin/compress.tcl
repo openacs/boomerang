@@ -7,7 +7,7 @@ ad_page_contract {
 }
 
 set resource_prefix [acs_package_root_dir boomerang/www/resources]
-set version_info [::boomerang::version_info]
+set resource_info [::boomerang::resource_info -version $version]
 set jsFile [lindex [dict get $version_info jsFiles] 0]
 set plainFile $resource_prefix/$jsFile
 set gzip [::util::which gzip]
