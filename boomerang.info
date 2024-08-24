@@ -9,8 +9,8 @@
     <implements-subsite-p>f</implements-subsite-p>
     <inherit-templates-p>f</inherit-templates-p>
     
-    <version name="0.6"
-	     url="http://openacs.org/repository/download/apm/boomerang-0.6.apm">
+    <version name="0.7"
+	     url="http://openacs.org/repository/download/apm/boomerang-0.7.apm">
         <owner url="mailto:neumann@wu-wien.ac.at">Gustaf Neumann</owner>
         <summary>
 	  
@@ -31,9 +31,9 @@ in particular with OpenACS subsites.
 	</summary>
         <release-date>2022-08-16</release-date>
 	<license>BSD License</license>
-        <maturity>0</maturity>
+        <maturity>1</maturity>
 
-        <provides url="boomerang" version="0.6"/>
+        <provides url="boomerang" version="0.7"/>
         <requires url="acs-templating" version="5.10.1b1"/>
         <requires url="acs-tcl" version="5.10.1b1"/>
 
