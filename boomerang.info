@@ -29,13 +29,13 @@ Details:
 This package integrates boomerang with OpenACS,
 in particular with OpenACS subsites.
 	</summary>
-        <release-date>2022-08-16</release-date>
+        <release-date>2024-09-02</release-date>
 	<license>BSD License</license>
         <maturity>1</maturity>
 
         <provides url="boomerang" version="0.7"/>
-        <requires url="acs-templating" version="5.10.1b1"/>
-        <requires url="acs-tcl" version="5.10.1b1"/>
+        <requires url="acs-templating" version="5.10.1"/>
+        <requires url="acs-tcl" version="5.10.1"/>
 
 	<callbacks>
           <callback type="before-uninstall"  proc="::boomerang::before-uninstall"/>
