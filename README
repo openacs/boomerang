@@ -114,7 +114,7 @@ OPTIONAL: DEFINE A CUSTOM BOOMERANG PLUGIN
     You might which to rename these with a custom name.
     
  5) Copy the *.min.js and *.min.js.gz files to
-    the boomerang/www/resouces directory, which might be
+    the boomerang/www/resources directory, which might be
     
       cp  build/boomerang-1.0.*.min.js build/boomerang-1.0.*.min.js.gz ..
 
