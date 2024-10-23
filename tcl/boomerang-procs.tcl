@@ -151,6 +151,13 @@ namespace eval ::boomerang {
         }
 
         :public object method record {-ns_set:required -peeraddr:required} {
+            #
+            # Record the received boomerang data from the client in a
+            # separate log file for later analysis. This method
+            # performs various saninty operations and tries to handle
+            # as many as possible (partial) results as received from
+            # the client.
+            #
             set t0 [clock clicks -microseconds]
             #xotcl::Object log "boomerang::record start"
 
