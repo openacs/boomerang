@@ -89,6 +89,9 @@ namespace eval ::boomerang {
 
         :object method log_to_file {-content -filename} {
             set logdir [file dirname [file rootname [ns_config ns/parameters ServerLog]]]
+            if {$logdir eq "."} {
+                set logdir [ns_config ns/parameters logdir]
+            }
             set F [open $logdir/$filename a]
             try {
                 puts $F $content
