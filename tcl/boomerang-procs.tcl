@@ -18,6 +18,22 @@ ad_library {
 }
 
 namespace eval ::boomerang {
+
+    #
+    # Share one descriptor per daily logfile across request interpreters.
+    # Keep old daily descriptors until process exit: queued async writes can
+    # still reference them after the date changes. The writer is drained
+    # before the at-exit callbacks run.
+    #
+    ns_runonce {
+        nsv_set boomerang logfileMutex [ns_mutex create boomerang:logfiles]
+        nsv_array set boomerang:logfiles {}
+        ns_atexit {
+            foreach {path fd} [nsv_array get boomerang:logfiles] {
+                catch {ns_asynclogfile close $fd}
+            }
+        }
+    }
     variable parameter_info
     #
     # It is possible to configure the version of the boomerang
@@ -92,44 +108,56 @@ namespace eval ::boomerang {
             if {$logdir eq "."} {
                 set logdir [ns_config ns/parameters logdir]
             }
-            set F [open $logdir/$filename a]
-            try {
-                puts $F $content
-            } finally {
-                close $F
+            set path [file join $logdir $filename]
+            if {![nsv_get boomerang:logfiles $path fd]} {
+                ns_mutex eval [nsv_get boomerang logfileMutex] {
+                    if {![nsv_get boomerang:logfiles $path fd]} {
+                        set fd [ns_asynclogfile open $path]
+                        nsv_set boomerang:logfiles $path $fd
+                    }
+                }
             }
+            #
+            # Submit one UTF-8 JSON line without log sanitizing, which would
+            # alter the serialized JSON. Disk writes run in the log writer.
+            #
+            ns_asynclogfile write -sanitize 0 $fd "$content\n"
         }
 
         :object method as_json {dict} {
-            package require json::write
-            #::json::write object {*}
-            set result ""
-            dict map {k v} $dict {
+            set native [expr {[info commands ::ns_json] ne ""}]
+            if {!$native} {
+                package require json::write
+            }
+            set result {}
+            dict for {k v} $dict {
                 #
-                # Some fields (like e.g.restiming) can't be used
-                # easily for elastic search, since it contains names
-                # with dots, and keys starting with dots, which are
-                # interpreted differently in elasticsearch
+                # Drop fields unsuitable for Elasticsearch, then map names
+                # containing dots. Preserve the numeric-field whitelist.
                 #
                 if {[info exists :json_drop($k)]} {
                     continue
                 }
-                #
-                # We have to map some key containing dots.
-                #
                 if {[info exists :json_map($k)]} {
                     set k [set :json_map($k)]
                 }
-                set entry "\"$k\":"
-                #
-                # Some fields have to be quoted
-                #
-                if {[info exists :json_unquoted($k)]} {
-                    append entry $v
+                if {$native} {
+                    if {[info exists :json_unquoted($k)]} {
+                        lappend result $k number $v
+                    } else {
+                        lappend result $k string $v
+                    }
                 } else {
-                    append entry [::json::write string $v]
+                    if {[info exists :json_unquoted($k)]} {
+                        set value $v
+                    } else {
+                        set value [::json::write string $v]
+                    }
+                    lappend result "[::json::write string $k]:$value"
                 }
-                lappend result $entry
+            }
+            if {$native} {
+                return [ns_json value -type object $result]
             }
             return "{[join $result ,]}"
         }
@@ -162,7 +190,6 @@ namespace eval ::boomerang {
             # the client.
             #
             set t0 [clock clicks -microseconds]
-            #xotcl::Object log "boomerang::record start"
 
             set entries [ns_set array $ns_set]
 
