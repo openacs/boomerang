@@ -19,21 +19,6 @@ ad_library {
 
 namespace eval ::boomerang {
 
-    #
-    # Share one descriptor per daily logfile across request interpreters.
-    # Keep old daily descriptors until process exit: queued async writes can
-    # still reference them after the date changes. The writer is drained
-    # before the at-exit callbacks run.
-    #
-    ns_runonce {
-        nsv_set boomerang logfileMutex [ns_mutex create boomerang:logfiles]
-        nsv_array set boomerang:logfiles {}
-        ns_atexit {
-            foreach {path fd} [nsv_array get boomerang:logfiles] {
-                catch {ns_asynclogfile close $fd}
-            }
-        }
-    }
     variable parameter_info
     #
     # It is possible to configure the version of the boomerang
@@ -104,19 +89,7 @@ namespace eval ::boomerang {
         }
 
         :object method log_to_file {-content -filename} {
-            set logdir [file dirname [file rootname [ns_config ns/parameters ServerLog]]]
-            if {$logdir eq "."} {
-                set logdir [ns_config ns/parameters logdir]
-            }
-            set path [file join $logdir $filename]
-            if {![nsv_get boomerang:logfiles $path fd]} {
-                ns_mutex eval [nsv_get boomerang logfileMutex] {
-                    if {![nsv_get boomerang:logfiles $path fd]} {
-                        set fd [ns_asynclogfile open $path]
-                        nsv_set boomerang:logfiles $path $fd
-                    }
-                }
-            }
+            set fd [nsv_get boomerang:logfiles $filename]
             #
             # Submit one UTF-8 JSON line without log sanitizing, which would
             # alter the serialized JSON. Disk writes run in the log writer.
@@ -395,6 +368,33 @@ namespace eval ::boomerang {
                 ns_log notice "boomerang::record done $record $pid [ns_conn method] u $u$r record $record total [expr {[clock clicks -microseconds] - $t0}] microseconds record [expr {[clock clicks -microseconds] - $t1}] "
             } on error {errorMsg} {
                 ns_log error "boomerang: cleanup lead to error: $errorMsg"
+            }
+        }
+    }
+
+
+    ad_proc -private prepare_logfiles {} {
+        Prepare the daily Boomerang log descriptors from initialization or
+        the daily scheduler callback. Request threads only use the published
+        descriptors; they never open logfiles.
+
+        @return Nothing.
+    } {
+        set logdir [file dirname [file rootname [ns_config ns/parameters ServerLog]]]
+        if {$logdir eq "."} {
+            set logdir [ns_config ns/parameters logdir]
+        }
+        set now [clock seconds]
+        #
+        # Open tomorrow's file ahead of midnight. Keep previous descriptors
+        # until process exit, since queued writes can still reference them.
+        # Only initialization and the non-threaded daily callback open files.
+        #
+        foreach when [list $now [clock add $now 1 day]] {
+            set filename boomerang-[clock format $when -format %Y-%m-%d].log
+            if {![nsv_exists boomerang:logfiles $filename]} {
+                set fd [ns_asynclogfile open [file join $logdir $filename]]
+                nsv_set boomerang:logfiles $filename $fd
             }
         }
     }

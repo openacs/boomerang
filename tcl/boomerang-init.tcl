@@ -1,4 +1,19 @@
 #
+# Initialize shared daily log descriptors before requests are registered.
+# Preopening tomorrow's file keeps descriptor creation out of request threads.
+# The async writer is drained before the at-exit callback closes the files.
+#
+nsv_array set boomerang:logfiles {}
+::boomerang::prepare_logfiles
+nsv_set boomerang logfileSchedule \
+    [ns_schedule_daily 0 0 ::boomerang::prepare_logfiles]
+ns_atexit {
+    foreach {filename fd} [nsv_array get boomerang:logfiles] {
+        catch {ns_asynclogfile close $fd}
+    }
+}
+
+#
 # We should get the URL from the parameter and register this for every
 # top-level subsite, on which boomerang is enabled
 #
